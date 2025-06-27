@@ -20,10 +20,12 @@ app.use(compression());
 app.use(cookieParser());
 app.use(morgan("combined", { stream: logger.morganStream }));
 
-app.use((req, res, next) => {
-  console.log("Cookies:", req.cookies);
-  next();
-});
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`);
