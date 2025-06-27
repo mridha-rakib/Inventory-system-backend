@@ -20,12 +20,7 @@ app.use(compression());
 app.use(cookieParser());
 app.use(morgan("combined", { stream: logger.morganStream }));
 
-app.use(
-  cors({
-    origin: config.FRONTEND_ORIGIN,
-    credentials: true,
-  })
-);
+
 
 const corsOptions = {
   origin: [
