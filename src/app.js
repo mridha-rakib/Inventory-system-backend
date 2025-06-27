@@ -20,8 +20,6 @@ app.use(compression());
 app.use(cookieParser());
 app.use(morgan("combined", { stream: logger.morganStream }));
 
-
-
 const corsOptions = {
   origin: [
     "http://localhost:3000",
@@ -35,6 +33,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.get("/.well-known/appspecific/com.chrome.devtools.json", (req, res) => {
+  return res.status(204).send();
+});
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`);
   next();
