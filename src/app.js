@@ -27,6 +27,19 @@ app.use(
   })
 );
 
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "https://inventory-ms-frontend-5.onrender.com",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+};
+
+app.use(cors(corsOptions));
+
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`);
   next();
