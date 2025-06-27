@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model.js";
 import logger from "../utils/logger.js";
-import { UnauthorizedError } from "../utils/errors/index.js";
 
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -26,6 +25,18 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
+const isLoggedOut = async (req, res, next) => {
+  try {
+    const accessToken = req.cookies.jwt;
+    if (accessToken) {
+      throw new Error("User already logged in.");
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 const admin = (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     next();
@@ -35,4 +46,4 @@ const admin = (req, res, next) => {
   }
 };
 
-export { protect, admin };
+export { protect, admin, isLoggedOut };

@@ -1,9 +1,8 @@
-import { BadRequestError, UnauthorizedError } from "../utils/errors/index.js";
 import logger from "../utils/logger.js";
 import User from "../models/user.model.js";
 
 class AuthService {
-  async register({ name, email, password }) {
+  async register({ name, email, password, image }) {
     try {
       const existingUser = await User.findOne({ email });
 
@@ -15,6 +14,7 @@ class AuthService {
         name,
         email,
         password,
+        image,
       });
 
       return user;

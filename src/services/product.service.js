@@ -1,6 +1,6 @@
 import Product from "../models/product.model.js";
 
-class ProductRepository {
+class ProductService {
   async create(productData) {
     const product = new Product(productData);
     return await product.save();
@@ -58,4 +58,4 @@ class ProductRepository {
   }
 }
 
-export default ProductRepository;
+export default ProductService;

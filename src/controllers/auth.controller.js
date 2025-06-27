@@ -5,16 +5,37 @@ import { config } from "../config/app.config.js";
 import { clearAuthCookie, setAuthCookie } from "../utils/cookie.js";
 import User from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
+import CloudinaryService from "../services/cloudinary.service.js";
+import fs from "fs/promises";
+
 
 class AuthController {
   constructor() {
     this.authService = new AuthService();
+    this.cloudinaryService = new CloudinaryService();
   }
 
   register = async (req, res, next) => {
+    let filePath;
+    let uploadResult;
+
+    if (req.file) {
+      filePath = req.file.path;
+    }
     try {
-      const { name, email, password } = req.body;
-      const user = await this.authService.register({ name, email, password });
+      if (req.file && filePath) {
+        await fs.access(req.file.path);
+
+        uploadResult = await this.cloudinaryService.uploadImage(filePath);
+      }
+
+      const userData = {
+        ...req.body,
+        ...(uploadResult && { image: uploadResult.url }),
+      };
+
+      const user = await this.authService.register(userData);
+
       if (user) {
         generateToken(res, user._id);
       } else {

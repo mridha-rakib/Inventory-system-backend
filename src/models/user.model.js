@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import validator from "validator";
-import { BadRequestError } from "../utils/errors/index.js";
 
 export const userSchema = new mongoose.Schema(
   {
@@ -33,9 +32,21 @@ export const userSchema = new mongoose.Schema(
         }
       },
     },
+    isAdmin: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
 
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
+    image: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid URL!`,
+      },
+    },
   },
   {
     timestamps: true,
