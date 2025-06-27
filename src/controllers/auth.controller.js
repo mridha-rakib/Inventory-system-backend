@@ -8,7 +8,6 @@ import generateToken from "../utils/generateToken.js";
 import CloudinaryService from "../services/cloudinary.service.js";
 import fs from "fs/promises";
 
-
 class AuthController {
   constructor() {
     this.authService = new AuthService();
@@ -39,12 +38,20 @@ class AuthController {
       if (user) {
         generateToken(res, user._id);
       } else {
-        res.status(400);
-        throw new Error("Invalid user data");
+        const error = new Error("Invalid user data");
+        error.statusCode = 400;
+        throw error;
       }
+      await this.cleanupFile(filePath);
       createdResponse(res, "User registered successfully", user);
     } catch (error) {
       logger.error(`Register controller error: ${error.message}`);
+      await this.cleanupFile(filePath);
+      if (uploadResult?.public_id) {
+        await this.cloudinaryService
+          .deleteImage(uploadResult.public_id)
+          .catch(console.error);
+      }
       next(error);
     }
   };
@@ -52,7 +59,14 @@ class AuthController {
   login = async (req, res, next) => {
     try {
       const { email, password } = req.body;
-      const user = await this.authService.login({ res, email, password });
+
+      if (!email || !password) {
+        const error = new Error("Email and password are required");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      const user = await this.authService.login({ email, password });
       generateToken(res, user._id);
       successResponse(res, "Login successful", { user });
     } catch (error) {
@@ -92,6 +106,18 @@ class AuthController {
       next(error);
     }
   };
+
+  async cleanupFile(filePath) {
+    if (!filePath) return;
+
+    try {
+      await fs.unlink(filePath);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        console.error("File cleanup error:", error.message);
+      }
+    }
+  }
 }
 
 export default AuthController;

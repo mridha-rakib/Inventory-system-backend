@@ -10,18 +10,22 @@ const protect = asyncHandler(async (req, res, next) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("Decoded JWT:", decoded);
-      req.user = await User.findById(decoded.sub);
-      console.log("Authenticated user:", req.user);
+      console.log("Decode: ", decoded);
+      req.user = await User.findById(decoded.userId).select("-password");
+      if (!req.user) {
+        res.status(401);
+        throw new Error("User not found");
+      }
+
       next();
     } catch (error) {
       logger.error(error);
       res.status(401);
-      throw new Error("Not authorized, token failed");
+      next(error);
     }
   } else {
     res.status(401);
-    throw new Error("Not authorized, token failed");
+    throw new Error("Not authorized, no token");
   }
 });
 
@@ -38,11 +42,14 @@ const isLoggedOut = async (req, res, next) => {
 };
 
 const admin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) {
+  console.log("Admin check - User:", req.user); // Debug
+  console.log("Admin check - isAdmin:", req.user?.isAdmin); // Debug
+
+  if (req.user && req.user.isAdmin === true) {
     next();
   } else {
-    res.status(401);
-    throw new Error("Not authorized, as admin");
+    res.status(403); // 401 এর পরিবর্তে 403 ব্যবহার করুন
+    throw new Error("Access denied. Admin privileges required.");
   }
 };
 

@@ -34,7 +34,7 @@ export class ProductController {
       await this.cleanupFile(filePath);
 
       if (uploadResult?.public_id) {
-        await cloudinaryService
+        await this.cloudinaryService
           .deleteImage(uploadResult.public_id)
           .catch(console.error);
       }
@@ -47,7 +47,9 @@ export class ProductController {
     try {
       const product = await this.productService.findById(req.params.id);
       if (!product) {
-        throw new NotFoundError("Product not found");
+        const error = new Error("Product not found");
+        error.statusCode = 404;
+        throw error;
       }
 
       successResponse(res, "Product retrieved successfully", product);
@@ -75,17 +77,22 @@ export class ProductController {
 
       successResponse(res, "Products retrieved successfully", result);
     } catch (error) {
-      console.error(error);
+      logger.error(`Get all products controller error: ${error.message}`);
+      next(error);
     }
   }
 
   async updateProduct(req, res, next) {
     let uploadResult;
     let filePath;
+
     const existingProduct = await this.productService.findById(req.params.id);
     if (!existingProduct) {
-      throw new Error("Product not found");
+      const error = new Error("Product not found");
+      error.statusCode = 404;
+      throw error;
     }
+
     if (req.file) {
       filePath = req.file.path;
     }
@@ -116,19 +123,19 @@ export class ProductController {
       if (filePath) {
         await this.cleanupFile(filePath);
       }
+      if (uploadResult?.public_id) {
+        await this.cloudinaryService
+          .deleteImage(uploadResult.public_id)
+          .catch(console.error);
+      }
       logger.error(`Update product controller error: ${error.message}`);
       next(error);
     }
   }
 
   async deleteProduct(req, res, next) {
-    const existingProduct = await this.productService.findById(req.params.id);
-    if (!existingProduct) {
-      throw new NotFoundError("Product not found");
-    }
     try {
-      const product = await this.productService.delete(req.params.id);
-
+      await this.productService.delete(req.params.id);
       successResponse(res, "Product deleted successfully", {});
     } catch (error) {
       logger.error(`Delete product controller error: ${error.message}`);

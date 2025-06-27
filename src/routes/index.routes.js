@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import authRoutes from "./auth.routes.js";
-import taskRoutes from "./product.routes.js";
+import productRoutes from "./product.routes.js";
 
 const rootRoutes = Router();
 
@@ -9,7 +9,7 @@ const moduleRoutes = [
   { path: "/auth", route: authRoutes },
   {
     path: "/products",
-    route: taskRoutes,
+    route: productRoutes,
   },
 ];
 

@@ -3,10 +3,10 @@ import { ProductController } from "../controllers/product.controller.js";
 import upload from "../utils/upload.js";
 import { protect, admin } from "../middlewares/auth.middleware.js";
 
-const productRouter = Router();
+const productRoutes = Router();
 const productController = new ProductController();
 
-productRouter
+productRoutes
   .route("/")
   .post(protect, upload.single("image"), (req, res, next) =>
     productController.createProduct(req, res, next)
@@ -15,7 +15,7 @@ productRouter
     productController.getAllProducts(req, res, next)
   );
 
-productRouter
+productRoutes
   .route("/:id")
   .get(protect, (req, res, next) =>
     productController.getProduct(req, res, next)
@@ -27,4 +27,4 @@ productRouter
     productController.deleteProduct(req, res, next)
   );
 
-export default productRouter;
+export default productRoutes;

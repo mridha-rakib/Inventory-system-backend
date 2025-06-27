@@ -7,7 +7,9 @@ class AuthService {
       const existingUser = await User.findOne({ email });
 
       if (existingUser) {
-        throw new Error("User already exist");
+        const error = new Error("User already exists");
+        error.statusCode = 409;
+        throw error;
       }
 
       const user = await User.create({
@@ -20,22 +22,32 @@ class AuthService {
       return user;
     } catch (error) {
       logger.error(`Registration error: ${error.message}`);
+      if (!error.statusCode) {
+        error.statusCode = 400;
+      }
       throw error;
     }
   }
 
-  async login({ res, email, password }) {
+  async login({ email, password }) {
     try {
       const user = await User.findOne({ email });
 
       if (user && (await user.matchPassword(password))) {
         return user;
       } else {
-        throw new Error("Invalid credential!");
+        const error = new Error("Invalid credentials!");
+        error.statusCode = 401;
+        throw error;
       }
     } catch (error) {
-      logger.error(`Login error: ${error.message}`);
-      throw error;
+      logger.error(`Login error : ${error.message}`);
+      if (error.statusCode) {
+        throw error;
+      }
+      const dbError = new Error("Database error occurred");
+      dbError.statusCode = 500;
+      throw dbError;
     }
   }
 }
