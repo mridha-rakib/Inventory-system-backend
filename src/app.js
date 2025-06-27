@@ -22,10 +22,8 @@ app.use(morgan("combined", { stream: logger.morganStream }));
 
 app.use(
   cors({
-    origin: true,
+    origin: config.FRONTEND_ORIGIN,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
