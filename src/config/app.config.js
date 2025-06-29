@@ -1,4 +1,7 @@
 import { getEnv } from "../utils/get-env.js";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const appConfig = () => ({
   NODE_ENV: getEnv("NODE_ENV", "development"),
